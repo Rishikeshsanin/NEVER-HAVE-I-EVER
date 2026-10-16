@@ -6,11 +6,11 @@ test("first-run classic, changing heat, history and skip", async ({ page }) => {
   await page.getByRole("button", { name: /start playing/i }).click();
   await expect(page.getByTestId("question-card")).toBeVisible();
   await expect(page.getByTestId("question-card")).toContainText("Never have I ever");
-  const first = await page.getByTestId("question-card").innerText();
+  const first = await page.locator(".question-body strong").innerText();
   await page.getByRole("button", { name: /next question/i }).click();
-  await expect(page.getByTestId("question-card")).not.toHaveText(first);
+  await expect(page.locator(".question-body strong")).not.toHaveText(first);
   await page.getByRole("button", { name: /previous question/i }).click();
-  await expect(page.getByTestId("question-card")).toContainText(first);
+  await expect(page.locator(".question-body strong")).toHaveText(first);
   await page.getByRole("button", { name: /back to chill/i }).click();
   await expect(page.getByTestId("active-heat")).toContainText("CHILL");
 });
