@@ -85,7 +85,8 @@ export default function GameApp() {
     if (stored && !stored.completed && stored.settings.heat <= 3 && Array.isArray(stored.historyIds)) {
       const lookup = new Map([...QUESTIONS, ...storedCustom].map(q => [q.id, q]));
       const restored = stored.historyIds.map(id => lookup.get(id)).filter((q): q is Question => Boolean(q));
-      if (restored.length === stored.historyIds.length && restored.length > 0) {
+      if (restored.length === stored.historyIds.length && restored.length > 0 &&
+          restored.every(q => q.heat <= 3)) {
         setHistory(restored);
         setCursor(Math.min(Math.max(stored.cursor, 0), restored.length - 1));
         setRemaining(Math.max(0, Math.min(300, stored.remainingSeconds)));
@@ -109,9 +110,11 @@ export default function GameApp() {
   }, [favorites, hydrated]);
   useEffect(() => {
     if (!hydrated) return;
-    if (screen === "play" && history.length > 0) {
+    // Do not persist an adult-level question, even after switching back to Chill.
+    if (screen === "play" && history.length > 0 &&
+        settings.heat <= 3 && history.every(q => q.heat <= 3)) {
       saveSession({ settings, historyIds: history.map(q => q.id), cursor, remainingSeconds: remaining, completed: false });
-    } else if (screen === "home" || screen === "summary") {
+    } else {
       saveSession(null);
     }
   }, [settings, history, cursor, remaining, screen, hydrated]);
