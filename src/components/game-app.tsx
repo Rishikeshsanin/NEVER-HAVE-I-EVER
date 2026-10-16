@@ -125,11 +125,20 @@ export default function GameApp() {
     if (screen === "play" && settings.mode === "quickfire" && remaining === 0) setScreen("summary");
   }, [remaining, screen, settings.mode]);
 
+  function normalizeSettings(next: Settings): Settings {
+    if (next.category === "Mixed") return next;
+    const pool = next.mode === "custom" ? custom : QUESTIONS;
+    const available = pool.some(q => q.heat === next.heat && (
+      next.category === "India Special" ? q.india : q.category === next.category
+    ));
+    return available ? next : { ...next, category: "Mixed" };
+  }
   function updateSettings(patch: Partial<Settings>) {
-    setSettings(previous => ({ ...previous, ...patch }));
+    setSettings(previous => normalizeSettings({ ...previous, ...patch }));
     setMessage("");
   }
-  function begin(nextSettings: Settings = settings) {
+  function begin(candidate: Settings = settings) {
+    const nextSettings = normalizeSettings(candidate);
     const source = nextSettings.mode === "custom" ? custom : QUESTIONS;
     const first = nextQuestion(source, nextSettings.heat, nextSettings.category, []);
     if (!first) {
@@ -157,8 +166,7 @@ export default function GameApp() {
       setAdultAgreement(false);
       return;
     }
-    const category = settings.category === "After Dark" && level !== 5 ? "Mixed" : settings.category;
-    const nextSettings = { ...settings, category, heat: level };
+    const nextSettings = normalizeSettings({ ...settings, heat: level });
     setSettings(nextSettings);
     setExhausted(false);
     ping(settings.sound, 380 + level * 110);
@@ -168,7 +176,7 @@ export default function GameApp() {
     if (!pendingHeat || !adultAge || !adultAgreement) return;
     const heat = pendingHeat;
     setConsentLevel(heat as 4 | 5);
-    const next = { ...settings, heat };
+    const next = normalizeSettings({ ...settings, heat });
     setSettings(next);
     setPendingHeat(null);
     if (pendingStart) begin(next);
@@ -284,7 +292,7 @@ export default function GameApp() {
       <span className="field-title">QUESTION CATEGORY</span>
       <select id={id} value={settings.category}
         onChange={e => updateSettings({ category: e.target.value as Category })}>
-        {CATEGORIES.filter(c => c !== "After Dark" || settings.heat === 5).map(c =>
+        {CATEGORIES.filter(c => c === "Mixed" || normalizeSettings({ ...settings, category: c }).category === c).map(c =>
           <option key={c} value={c}>{c === "Mixed" ? "✦ All topics (best mix)" : c === "India Special" ? "🇮🇳 India / college special" : c}</option>
         )}
       </select>
