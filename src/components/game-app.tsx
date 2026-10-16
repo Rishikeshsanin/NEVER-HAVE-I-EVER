@@ -3,11 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft, ArrowRight, ArrowUpRight, Check, ChevronLeft, ChevronRight,
-  Clock3, Flame, Heart, Infinity as InfinityIcon, Maximize2, Minus, Music2,
+  Clock3, Flame, Heart, Infinity as InfinityIcon, Maximize2, Minus,
   PencilLine, Plus, RotateCcw, Settings2, Share2, ShieldCheck, Shuffle,
   SkipForward, Sparkles, Volume2, VolumeX, X, Zap,
 } from "lucide-react";
-import { CATEGORIES, HEAT_LEVELS, MODES, type Category, type Heat, type Mode, type Question } from "@/lib/types";
+import { CATEGORIES, HEAT_LEVELS, MODES, type Category, type Heat, type Question } from "@/lib/types";
 import { DEFAULT_SETTINGS, loadCustom, loadSession, loadSettings, saveCustom, saveSession, saveSettings, type Settings } from "@/lib/storage";
 import { nextQuestion, normalizedCustomText, validateCustomQuestion } from "@/lib/engine";
 import { QUESTIONS } from "@/data";
@@ -70,7 +70,6 @@ export default function GameApp() {
   const current = history[cursor] ?? null;
   const total = history.length;
   const info = heatInfo(settings.heat);
-  const activeSource = settings.mode === "custom" ? custom : QUESTIONS;
   const favoritesSet = new Set(favorites);
 
   useEffect(() => {
@@ -404,7 +403,7 @@ export default function GameApp() {
                 <div className="question-top"><span>THE QUESTION IS...</span><span>✦ {current.category.toUpperCase()} ✦</span></div>
                 <div className="question-body">
                   <div className="question-quote" aria-hidden="true">&ldquo;</div>
-                  <p><span>Never have I ever</span><br /><strong>{current.text.replace(/^Never have I ever\s*/i, "")}</strong></p>
+                  <p><span>Never have I ever </span><br /><strong>{current.text.replace(/^Never have I ever\s*/i, "")}</strong></p>
                 </div>
                 <div className="question-bottom">
                   <span><span className="asterisk">✳</span> {settings.mode === "classic" ? "PUT A FINGER DOWN IF YOU HAVE" : "EVER DONE IT? NO JUDGMENT."}</span>
