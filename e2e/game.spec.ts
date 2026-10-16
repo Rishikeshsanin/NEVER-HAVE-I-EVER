@@ -37,3 +37,16 @@ test("mobile setup fits and custom question creation works", async ({ page }) =>
   await page.getByRole("button", { name: /back to setup/i }).click();
   await expect(page.getByRole("button", { name: /start playing/i })).toBeVisible();
 });
+
+test("unavailable topics reset when changing heat level", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("QUESTION CATEGORY").selectOption("School Memories");
+  await page.getByRole("button", { name: /after dark/i }).first().click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.getByLabel("Everyone playing is at least 18.").check();
+  await page.getByLabel(/everyone in the group agrees/i).check();
+  await page.getByRole("button", { name: /unlock this heat/i }).click();
+  await expect(page.getByLabel("QUESTION CATEGORY")).toHaveValue("Mixed");
+  await page.getByRole("button", { name: /start playing/i }).click();
+  await expect(page.getByTestId("active-heat")).toContainText("AFTER DARK");
+});
