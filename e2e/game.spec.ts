@@ -50,3 +50,19 @@ test("unavailable topics reset when changing heat level", async ({ page }) => {
   await page.getByRole("button", { name: /start playing/i }).click();
   await expect(page.getByTestId("active-heat")).toContainText("AFTER DARK");
 });
+
+test("adult questions are not restored after switching down and refreshing", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: /spicy/i }).first().click();
+  await page.getByLabel("Everyone playing is at least 18.").check();
+  await page.getByLabel(/everyone in the group agrees/i).check();
+  await page.getByRole("button", { name: /unlock this heat/i }).click();
+  await page.getByRole("button", { name: /start playing/i }).click();
+  await expect(page.getByTestId("active-heat")).toContainText("SPICY");
+  await page.getByRole("button", { name: /back to chill/i }).click();
+  await expect(page.getByTestId("active-heat")).toContainText("CHILL");
+  await page.waitForFunction(() => sessionStorage.getItem("nhie-v1-session") === null);
+  await page.reload();
+  await expect(page.getByRole("button", { name: /start playing/i })).toBeVisible();
+  await expect(page.getByTestId("question-card")).toHaveCount(0);
+});
